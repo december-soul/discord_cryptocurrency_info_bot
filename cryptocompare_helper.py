@@ -8,12 +8,6 @@ h = History()
 
 exchanges = ['Cryptsy', 'BTCChina', 'Bitstamp', 'BTER', 'OKCoin', 'Coinbase', 'Poloniex', 'Cexio', 'BTCE', 'BitTrex', 'Kraken', 'Bitfinex', 'Yacuna', 'LocalBitcoins', 'Yunbi', 'itBit', 'HitBTC', 'btcXchange', 'BTC38', 'Coinfloor', 'Huobi', 'CCCAGG', 'LakeBTC', 'ANXBTC', 'Bit2C', 'Coinsetter', 'CCEX', 'Coinse', 'MonetaGo', 'Gatecoin', 'Gemini', 'CCEDK', 'Cryptopia', 'Exmo', 'Yobit', 'Korbit', 'BitBay', 'BTCMarkets', 'Coincheck', 'QuadrigaCX', 'BitSquare', 'Vaultoro', 'MercadoBitcoin', 'Bitso', 'Unocoin', 'BTCXIndia', 'Paymium', 'TheRockTrading', 'bitFlyer', 'Quoine', 'Luno', 'EtherDelta', 'bitFlyerFX', 'TuxExchange', 'CryptoX', 'Liqui', 'MtGox', 'BitMarket', 'LiveCoin', 'Coinone', 'Tidex', 'Bleutrade', 'EthexIndia', 'Bithumb', 'CHBTC', 'ViaBTC', 'Jubi', 'Zaif', 'Novaexchange', 'WavesDEX', 'Binance', 'Lykke', 'Remitano', 'Coinroom', 'Abucoins', 'BXinth', 'Gateio', 'HuobiPro', 'OKEX'] 
 
-#def pp_json(json_thing, sort=True, indents=4):
-#    if type(json_thing) is str:
-#        print(json.dumps(json.loads(json_thing), sort_keys=sort, indent=indents))
-#    else:
-#        print(json.dumps(json_thing, sort_keys=sort, indent=indents))
-#    return None
 
 def help_coins(number1, number2):
     msg = "we support the following coins:\n"
@@ -39,6 +33,7 @@ def getCoin(from_coin, to_coin='USD', exchange='CCCAGG', usefallback=True ):
         if exchange.upper() not in map(lambda x:x.upper(),exchanges):
                 raise ValueError('unsupported exchange')
                 #return("unsupported exchange")
+        from_coin = from_coin.upper()
         timestamp_now = int(time.time())
         timestamp_hour = timestamp_now - 3600 # 1houre
         timestamp_day = timestamp_now - (60*60*24) # 1day
@@ -59,46 +54,3 @@ def getCoin(from_coin, to_coin='USD', exchange='CCCAGG', usefallback=True ):
                 else:
                         raise ValueError('Invalid coin pair ' + from_coin + "/" + to_coin)
                         #return (-1, -1, -1, -1, "unknown")#msg += ("invalid coin {0}/{1} at {2}: {3}\n".format(from_coin, to_coin, exchange, inst))
-
-    
-def coin(from_coin, to_coins=['BTC','USD', 'ETH'], exchange='CCCAGG', usefallback=True ):
-	if exchange.upper() not in map(lambda x:x.upper(),exchanges):
-		return("unsupported exchange")
-	timestamp_now = int(time.time())
-	timestamp_hour = timestamp_now - 3600 # 1houre
-	timestamp_day = timestamp_now - (60*60*24) # 1day
-	timestamp_7days = timestamp_now - (60*60*24*7) # 7days
-	msg = ""
-	for to_coin in to_coins:
-		try:
-			price_now=p.price(from_coin, to_coin, e=exchange)[to_coin]
-			#price_now=p.priceHistorical(from_coin, to_coin, exchange)[from_coin][to_coin]			
-			price_hour=p.priceHistorical(from_coin, to_coin, exchange, ts=timestamp_hour)[from_coin][to_coin]
-			price_day=p.priceHistorical(from_coin, to_coin, exchange, ts=timestamp_day)[from_coin][to_coin]
-			price_7days=p.priceHistorical(from_coin, to_coin, exchange, ts=timestamp_7days)[from_coin][to_coin]
-			#print("{0}/{1} {2:5.8f}$ 1h={3:8.8f}$ 1d={4:8.8f}$ 7d={5:8.8f}$ @{6}".format(from_coin, to_coin, price_now, price_hour, price_day, price_7days, exchange))
-			msg += ("{0}/{1} {2:5.8f} 1h={3:8.2f}% 1d={4:8.2f}% 7d={5:8.2f}% @{6}\n".format(from_coin, to_coin, price_now, diff(price_now, price_hour), diff(price_now, price_day), diff(price_now,price_7days), exchange))
-		except Exception as inst:
-			#msg += ("invalid coin {0}/{1} at {2}: {3}, use fallback CCCAGG\n".format(from_coin, to_coin, exchange, inst))
-			if usefallback:
-				msg += coin(from_coin, [str(inst).replace("\'", "")], usefallback=False) 
-			else:
-				msg += ("invalid coin {0}/{1} at {2}: {3}\n".format(from_coin, to_coin, exchange, inst))
-
-	return(msg)
-
-
-price_now, diff_h, diff_d, diff_7d, ex =  getCoin("RDD", "BTC", "bittrex")
-
-print("{0}/{1} {2:5.8f} 1h={3:8.2f}% 1d={4:8.2f}% 7d={5:8.2f}% @{6}\n".format("RDD", "BTC", price_now, diff_h, diff_d, diff_7d, ex))
-#print(help_coins(0,10))
-
-#print(help_exchanges())
-#print('Number of arguments:', len(sys.argv), 'arguments.')
-#print('Argument List:', str(sys.argv))
-#if (len(sys.argv)>3):
-#	print(coin(sys.argv[1].upper(), [sys.argv[2]], sys.argv[3]))
-#elif (len(sys.argv)>2):
-#	print(coin(sys.argv[1].upper(), exchange=sys.argv[2]))
-#else:
-#	print(coin(str(sys.argv[1].upper())))
