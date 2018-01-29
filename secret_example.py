@@ -1,0 +1,1 @@
+DISCORD_KEY = "Mzk3NDkzMzkxMDI3NDcwMzM2.DSwyFg.GAF0Rgqpbbe-PiPfeUjoAFAKLfI"
