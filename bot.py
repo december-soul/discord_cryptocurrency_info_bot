@@ -15,13 +15,17 @@ async def on_message(message):
         msg = "call \n!list coins\n or \!list exchanges"
         await client.send_message(message.author, msg)
     elif message.content.startswith('!list coins'):
-        await client.send_message(message.channel, help_coins(0,2000))
-        await client.send_message(message.channel, help_coins(2000,4000))
-        await client.send_message(message.channel, help_coins(4000,6000))
-        await client.send_message(message.channel, help_coins(6000,8000))
-        await client.send_message(message.channel, help_coins(8000,-1))
+        msg = "we support the following coins:\n"
+        await client.send_message(message.author, msg)
+        generator = (i for i in getAllCoins())
+        head = list(next(generator) for _ in range(300))
+        while len(head) > 0:
+            msg = ", ".join(head)
+            head = list(next(generator) for _ in range(300))
+            await client.send_message(message.author, msg)
+
     elif message.content.startswith('!list exchanges'):
-        await client.send_message(message.author, help_exchanges())
+        await client.send_message(message.author, "we support the following exchanges:\n" + ", ".join(getAllExchanges()))
         #await client.send_message(message.channel, help_exchanges())
     elif message.content.startswith('!!!'):
         msg = 'Hello {0.author.mention} this will be a chart (maybe)'.format(message)
