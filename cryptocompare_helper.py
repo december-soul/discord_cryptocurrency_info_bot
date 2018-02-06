@@ -19,6 +19,10 @@ def help_exchanges():
     msg += ", ".join(exchanges)
     return(msg)
 
+def getCoinInfo(coin):
+    coininfo = p.coinList()['Data'][coin]
+    return "https://www.cryptocompare.com"+coininfo['ImageUrl'], "https://www.cryptocompare.com"+coininfo['Url'], coininfo['Id'], coininfo['FullName'], coininfo['SortOrder']
+
 def getAllCoins():
     return list(p.coinList()['Data'].keys())
 
