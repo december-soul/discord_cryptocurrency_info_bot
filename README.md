@@ -2,24 +2,22 @@
 
 
 copy secret.py and insert your discord key
-'''
+```
 cp secret_example.py secret.py
 vi secret.py
-'''
+```
 
 start bot
-'''
+```
 python3 bot.py
-'''
+```
 
 bot will listen to "!"
 you should start with 
-'''
-!help
-'''
+```
+```
 
-
-'''
+```
 Help
 !list exchanges
 show all possible exchanges.
@@ -55,4 +53,4 @@ Details
 CCCAGG stands for CCCAGG = CryptoCompare Current Aggregate.
 
 As default we answer the price for BTC, ETH and USD
-'''
+```
