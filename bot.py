@@ -1,11 +1,11 @@
 import discord
 from cryptocompare_helper import *
+from coinmarketcap_helper import *
 from secret import DISCORD_KEY
 
 '''
     TODO:
         -color of Embed should depends on price change
-        -if coin was not found via cryptocompare, then use coinmarketcap
         -allow to ask for XVG/BTC to define the to_coin
         -leading space ignore
 
@@ -20,7 +20,7 @@ async def on_message(message):
     # we do not want the bot to reply to itself
     if message.author == client.user:
         return
-
+    #print("{} server={} channel={} user={} massage={}".format(message.timestamp, message.server, message.channel, message.author.name, message.content))
     if message.content.startswith('!help'):
         em = discord.Embed(title="Help", colour=0xFFFFFF)
         em.add_field(name="!list exchanges", value="show all possible exchanges.", inline=False)
@@ -55,13 +55,21 @@ async def on_message(message):
             exchange = args[1]
         else:
             exchange = "CCCAGG"
-        thumbnail_url, info_url, coinid, fullname, score = getCoinInfo(coin)
+        try:    
+            thumbnail_url, info_url, coinid, fullname, score = getCoinInfo(coin)        
+        except:
+            thumbnail_url, info_url, coinid, fullname, score = getCoinInfoCC(coin)
         em = discord.Embed(title="Price " + coin, colour=0xFF0000)
         #em.set_thumbnail(thumbnail_url)
         em.set_thumbnail(url=thumbnail_url)
         for x in ['BTC', 'USD', 'ETH']:
+            if coin == x:
+                continue
             try:
-                price_now, diff_h, diff_d, diff_7d, ex =  getCoin(coin, x, exchange=exchange)
+                try:
+                    price_now, diff_h, diff_d, diff_7d, ex =  getCoin(coin, x, exchange=exchange)
+                except:
+                    price_now, diff_h, diff_d, diff_7d, ex =  getCoinCC(coin, x)
                 symbol_h = SYMBOL_DOWN if diff_h < 0 else SYMBOL_UP
                 symbol_d = SYMBOL_DOWN if diff_d < 0 else SYMBOL_UP
                 symbol_7d = SYMBOL_DOWN if diff_7d < 0 else SYMBOL_UP
@@ -86,8 +94,13 @@ async def on_message(message):
 
         em = discord.Embed(title="Price " + coin, colour=0xFF0000)
         for x in ['BTC', 'USD', 'ETH']:
+            if coin == x:
+                continue
             try:
-                price_now, diff_h, diff_d, diff_7d, ex =  getCoin(coin, x, exchange=exchange)
+                try:
+                    price_now, diff_h, diff_d, diff_7d, ex =  getCoin(coin, x, exchange=exchange)
+                except:
+                    price_now, diff_h, diff_d, diff_7d, ex =  getCoinCC(coin, x)
                 symbol_h = SYMBOL_DOWN if diff_h < 0 else SYMBOL_UP
                 symbol_d = SYMBOL_DOWN if diff_d < 0 else SYMBOL_UP
                 symbol_7d = SYMBOL_DOWN if diff_7d < 0 else SYMBOL_UP
@@ -106,19 +119,31 @@ async def on_message(message):
         em = discord.Embed(colour=0xFF0000)
         if len(args) == 2:            
             for x in ['BTC', 'USD', 'ETH']:
+                if coin == x:
+                    continue
                 try:
                     price_now, diff_h, diff_d, diff_7d, ex =  getCoin(coin, x, exchange=args[1])
                     msg += "{0}/{1} {2:5.8f} 1h={3:8.2f}% 1d={4:8.2f}% 7d={5:8.2f}% @{6}\n".format(coin, x, price_now, diff_h, diff_d, diff_7d, ex)
                 except:
-                    pass
+                    try:
+                        price_now, diff_h, diff_d, diff_7d, ex =  getCoinCC(coin, x)
+                        msg += "{0}/{1} {2:5.8f} 1h={3:8.2f}% 1d={4:8.2f}% 7d={5:8.2f}% @{6}\n".format(coin, x, price_now, diff_h, diff_d, diff_7d, ex)
+                    except:
+                        pass
         else:
             for x in ['BTC', 'USD', 'ETH']:
+                if coin == x:
+                    continue
                 try:
                     price_now, diff_h, diff_d, diff_7d, ex =  getCoin(coin, x)
                     msg += "{0}/{1} {2:5.8f} 1h={3:8.2f}% 1d={4:8.2f}% 7d={5:8.2f}% @{6}\n".format(coin, x, price_now, diff_h, diff_d, diff_7d, ex)
                 except:
-                    pass
-                
+                    try:
+                        price_now, diff_h, diff_d, diff_7d, ex =  getCoinCC(coin, x)
+                        msg += "{0}/{1} {2:5.8f} 1h={3:8.2f}% 1d={4:8.2f}% 7d={5:8.2f}% @{6}\n".format(coin, x, price_now, diff_h, diff_d, diff_7d, ex)                    
+                    except:
+                        pass
+                    
         em.add_field(name="Price", value=msg, inline=True)
         em.set_footer(text="use !help for more infos")
         await client.send_message(message.channel, embed=em)
