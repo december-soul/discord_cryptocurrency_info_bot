@@ -55,3 +55,6 @@ CCCAGG stands for CCCAGG = CryptoCompare Current Aggregate.
 
 As default we answer the price for BTC, ETH and USD
 ```
+
+
+If you don't know how to add a bot to your discord server then you can take a look at this [Howto](https://github.com/reactiflux/discord-irc/wiki/Creating-a-discord-bot-&-getting-a-token)
