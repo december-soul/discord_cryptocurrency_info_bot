@@ -15,6 +15,7 @@ python3 bot.py
 bot will listen to "!"
 you should start with 
 ```
+!help
 ```
 
 ```
