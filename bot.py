@@ -1,4 +1,5 @@
 import discord
+from discord.ext import commands
 from cryptocompare_helper import *
 from coinmarketcap_helper import *
 from secret import DISCORD_KEY
@@ -13,7 +14,9 @@ from secret import DISCORD_KEY
 SYMBOL_UP=u"\u25B2"
 SYMBOL_DOWN=u"\u25BD"
 
-client = discord.Client()
+Client = discord.Client()
+client = commands.Bot(command_prefix = "!")
+
 
 def getToCoin(args):
     if len(args.split("/")) == 2:
@@ -23,15 +26,17 @@ def getToCoin(args):
     
 def getFromCoin(args):
     if len(args.split("/")) == 2:
-        return args.upper().split("/")[0]
+        fromCoin = args.upper().split("/")[0]
     else:
-        return args.upper()
+        fromCoin = args.upper()
+    return coinToSymbol(fromCoin)
 
 def getExchange(args):
     if len(args) == 2:
         exchange = args[1]
     else:
         exchange = "CCCAGG"
+    return exchange
 
 @client.event
 async def on_message(message):
@@ -65,84 +70,82 @@ async def on_message(message):
         await client.send_message(message.author, "we support the following exchanges:\n" + ", ".join(getAllExchanges()))
     elif message.content.startswith('!!!'):
         args = message.content.replace("!!!", "").strip().split(" ")
-        if len(args) < 1:
-            await client.send_message(message.author, "missing coin")
-            return
-        coin = getFromCoin(args[0])
+        fromCoin = getFromCoin(args[0])
+        toCoin = getToCoin(args[0])
         exchange = getExchange(args)
         try:    
-            thumbnail_url, info_url, coinid, fullname, score = getCoinInfo(coin)        
+            thumbnail_url, info_url, coinid, fullname, score = getCoinInfo(fromCoin)        
         except:
-            thumbnail_url, info_url, coinid, fullname, score = getCoinInfoCC(coin)
-        em = discord.Embed(title="Price " + coin, colour=0xFF0000)
+            thumbnail_url, info_url, coinid, fullname, score = getCoinInfoCC(fromCoin)
+        em = discord.Embed(title="Price " + fromCoin, colour=0xFF0000)
         em.set_thumbnail(url=thumbnail_url)
-        for x in getToCoin(args[0]):
-            if coin == x:
+        for x in toCoin:
+            if fromCoin == x:
                 continue
             try:
                 try:
-                    price_now, diff_h, diff_d, diff_7d, ex =  getCoin(coin, x, exchange=exchange)
+                    price_now, diff_h, diff_d, diff_7d, ex =  getCoin(fromCoin, x, exchange=exchange)
                 except:
-                    price_now, diff_h, diff_d, diff_7d, ex =  getCoinCC(coin, x)
+                    price_now, diff_h, diff_d, diff_7d, ex =  getCoinCC(fromCoin, x)
                 symbol_h = SYMBOL_DOWN if diff_h < 0 else SYMBOL_UP
                 symbol_d = SYMBOL_DOWN if diff_d < 0 else SYMBOL_UP
                 symbol_7d = SYMBOL_DOWN if diff_7d < 0 else SYMBOL_UP
-                msg = "{0:5.8f} @ {1}\n{2}\nRank {3}".format(price_now, ex, fullname, score)
-                em.add_field(name=coin+"/"+x, value=msg, inline=True)
+                msg = "{0:5.8f} @ {1} \n{2}\nRank {3}".format(price_now, ex, fullname, score)
+                em.add_field(name=fromCoin+"/"+x, value=msg, inline=True)
                 msg = "1h={0:8.2f}% {1} \n1d={2:8.2f}% {3} \n7d={4:8.2f}% {5}".format(diff_h, symbol_h, diff_d, symbol_d, diff_7d, symbol_7d)
                 em.add_field(name="Diff", value=msg, inline=True)
                 em.set_footer(text="use !help for more infos")
             except Exception as inst:
-                await client.send_message(message.author, "invalid or unknown coin pair "+coin+"/"+x)
-                print("invalid coin pair "+coin+"/"+x)
+                await client.send_message(message.author, "invalid or unknown coin pair "+fromCoin+"/"+x)
+                print("invalid coin pair "+fromCoin+"/"+x)
         await client.send_message(message.channel, embed=em)
     elif message.content.startswith('!!'):
         args = message.content.replace("!!", "").strip().split(" ")
-        if len(args) < 1:
-            await client.send_message(message.author, "missing coin")
-            return
-        coin = getFromCoin(args[0])
+        fromCoin = getFromCoin(args[0])
+        toCoin = getToCoin(args[0])
         exchange = getExchange(args)
 
-        em = discord.Embed(title="Price " + coin, colour=0xFF0000)
-        for x in getToCoin(args[0]):
-            if coin == x:
+        em = discord.Embed(title="Price " + fromCoin, colour=0xFF0000)
+        for x in toCoin:
+            if fromCoin == x:
                 continue
             try:
                 try:
-                    price_now, diff_h, diff_d, diff_7d, ex =  getCoin(coin, x, exchange=exchange)
+                    price_now, diff_h, diff_d, diff_7d, ex =  getCoin(fromCoin, x, exchange=exchange)
                 except:
-                    price_now, diff_h, diff_d, diff_7d, ex =  getCoinCC(coin, x)
+                    price_now, diff_h, diff_d, diff_7d, ex =  getCoinCC(fromCoin, x)
                 symbol_h = SYMBOL_DOWN if diff_h < 0 else SYMBOL_UP
                 symbol_d = SYMBOL_DOWN if diff_d < 0 else SYMBOL_UP
                 symbol_7d = SYMBOL_DOWN if diff_7d < 0 else SYMBOL_UP
-                msg = "{0:5.8f} @ {1}\n".format(price_now, ex)
-                em.add_field(name=coin+"/"+x, value=msg, inline=True)
+                msg = "{0:5.8f} @ {1} \n".format(price_now, ex)
+                em.add_field(name=fromCoin+"/"+x, value=msg, inline=True)
                 msg = "1h={0:8.2f}% {1} 1d={2:8.2f}% {3} 7d={4:8.2f}% {5}\n".format(diff_h, symbol_h, diff_d, symbol_d, diff_7d, symbol_7d)
                 em.add_field(name="Diff", value=msg, inline=True)
             except Exception as inst:
-                await client.send_message(message.author, "invalid or unknown coin pair "+coin+"/"+x)
-                print("invalid coin pair "+coin+"/"+x)
+                await client.send_message(message.author, "invalid or unknown coin pair "+fromCoin+"/"+x)
+                print("invalid coin pair "+fromCoin+"/"+x)
         em.set_footer(text="use !help for more infos")
         await client.send_message(message.channel, embed=em)
     elif message.content.startswith('!'):
         args = message.content.replace("!", "").strip().split(" ")
-        coin = getFromCoin(args[0])
+        fromCoin = getFromCoin(args[0])
+        toCoin = getToCoin(args[0])
         exchange = getExchange(args)
         msg = ""
         em = discord.Embed(colour=0xFF0000)
                     
-        for x in getToCoin(args[0]):
-            if coin == x:
+        for x in toCoin:
+            if fromCoin == x:
                 continue
             try:
-                price_now, diff_h, diff_d, diff_7d, ex =  getCoin(coin, x, exchange=args[1])
-                msg += "{0}/{1} {2:5.8f} 1h={3:8.2f}% 1d={4:8.2f}% 7d={5:8.2f}% @{6}\n".format(coin, x, price_now, diff_h, diff_d, diff_7d, ex)
+                price_now, diff_h, diff_d, diff_7d, ex =  getCoin(fromCoin, x, exchange=exchange)
+                msg += "{0}/{1} {2:5.8f} 1h={3:8.2f}% 1d={4:8.2f}% 7d={5:8.2f}% @{6}\n".format(fromCoin, x, price_now, diff_h, diff_d, diff_7d, ex)
             except:
                 try:
-                    price_now, diff_h, diff_d, diff_7d, ex =  getCoinCC(coin, x)
-                    msg += "{0}/{1} {2:5.8f} 1h={3:8.2f}% 1d={4:8.2f}% 7d={5:8.2f}% @{6}\n".format(coin, x, price_now, diff_h, diff_d, diff_7d, ex)
+                    price_now, diff_h, diff_d, diff_7d, ex =  getCoinCC(fromCoin, x)
+                    msg += "{0}/{1} {2:5.8f} 1h={3:8.2f}% 1d={4:8.2f}% 7d={5:8.2f}% @{6}\n".format(fromCoin, x, price_now, diff_h, diff_d, diff_7d, ex)
                 except:
+                    await client.send_message(message.author, "invalid or unknown coin pair "+fromCoin+"/"+x)
                     pass
         
         em.add_field(name="Price", value=msg, inline=True)

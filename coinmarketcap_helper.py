@@ -2,8 +2,14 @@ from pymarketcap import Pymarketcap
 
 coinmarketcap = Pymarketcap()
 
-
-
+def coinToSymbol(coinname):
+    try:
+        coin = coinmarketcap.ticker(coinname.lower())
+        coin_symbol = coin["symbol"]
+        return coin_symbol.upper()
+    except:
+        return coinname
+    
 def getCoinInfoCC(coin):
     try:
         coininfo = coinmarketcap.ticker(coin)
