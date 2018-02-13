@@ -11,50 +11,19 @@ start bot
 ```
 python3 bot.py
 ```
-
-bot will listen to "!"
-you should start with 
-```
-!help
-```
-
-```
 Help
-!list exchanges
-show all possible exchanges.
-!list coins
-show all possible coins.
-!VERY LONG ANSWER!
-!<COIN>
-show a short, text based price info for the given coin. 
-Use cryptocompare as data source
-Example: !LTC
-!<COIN> <EXCHANGE>
-show a short, text based price info for the given coin. 
-Use given exchange as data source
-Example: !LTC bittrex
-!!<COIN>
-more details price info for the given coin. 
-Use cryptocompare as data source
-  Example: !!LTC
-!!<COIN> <EXCHANGE>
-more details price info for the given coin. 
-Use given exchange as data source
-Example: !!LTC bittrex
-!!!<COIN>
-full details price info for the given coin. 
-Use cryptocompare as data source
-  Example: !!!LTC
-!!!<COIN> <EXCHANGE>
-full details price info for the given coin. 
-Use given exchange as data source
-Example: !!!LTC bittrex
-Details
-@bittrex means that the price was taken from the exchange bittrex. If the coinpair is not listed at the given exchange, then CCCAGG will be taken.
-CCCAGG stands for CCCAGG = CryptoCompare Current Aggregate.
 
-As default we answer the price for BTC, ETH and USD
-```
+![!!!NEO](images/!help.png)
+
+some examples
+
+![!NEO](images/!NEO.png)
+![!!NEO](images/!!NEO.png)
+![!!!NEO](images/!!!NEO.png)
+![!!!BTCUSD.png](images/!!!BTCUSD.png)
+![!!!BTCUSD_bitstamp.png](images/!!!BTCUSD_bitstamp.png)
+ 
+![!!!!ETHUSD.png](images/!!!!ETHUSD.png)  
 
 
 If you don't know how to add a bot to your discord server then you can take a look at this [Howto](https://github.com/reactiflux/discord-irc/wiki/Creating-a-discord-bot-&-getting-a-token)
