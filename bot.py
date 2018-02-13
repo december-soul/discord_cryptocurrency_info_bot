@@ -2,21 +2,18 @@ import discord
 from discord.ext import commands
 from cryptocompare_helper import *
 from coinmarketcap_helper import *
+from tradingview_helper import *
 from secret import DISCORD_KEY
 
 '''
     TODO:
         -color of Embed should depends on price change
-        -allow bitcoin as btc
-        - catch some more errors
-        -do you mean ... 
+        -catch some more errors
 '''
 SYMBOL_UP=u"\u25B2"
 SYMBOL_DOWN=u"\u25BD"
 
-Client = discord.Client()
-client = commands.Bot(command_prefix = "!")
-
+client = discord.Client()
 
 def getToCoin(args):
     if len(args.split("/")) == 2:
@@ -54,7 +51,10 @@ async def on_message(message):
         em.add_field(name="!!<COIN> <EXCHANGE>", value="more details price info for the given coin. \nUse given exchange as data source\nExample: !!LTC bittrex\n", inline=False)
         em.add_field(name="!!!<COIN>", value="full details price info for the given coin. \nUse cryptocompare as data source\n  Example: !!!LTC\n", inline=False)
         em.add_field(name="!!!<COIN> <EXCHANGE>", value="full details price info for the given coin. \nUse given exchange as data source\nExample: !!!LTC bittrex\n", inline=False)
-        em.add_field(name="Details", value="@bittrex means that the price was taken from the exchange bittrex. If the coinpair is not listed at the given exchange, then CCCAGG will be taken.\nCCCAGG stands for CCCAGG = CryptoCompare Current Aggregate.\n\nAs default we answer the price for BTC, ETH and USD\n\n", inline=False)
+        em.add_field(name="!!!!<COIN>", value="Technical analyses taken from tradingview.com\nExample: !!!!BTC/USD\n", inline=False)
+        em.add_field(name="Details COINS", value="A coin can be a simple coin like, BTC or LTC. You can also pass the coinname like bitcoin.\nBy default we answer the price for BTC, ETH and USD\nIf you want the answer for a coin pair like BTC/ETC, then you use a coinpair as COIN", inline=False)
+        em.add_field(name="Details EXCHANGE", value="@bittrex means that the price was taken from the exchange bittrex. If the coinpair is not listed at the given exchange, then CCCAGG will be taken.\nCCCAGG stands for CCCAGG = CryptoCompare Current Aggregate.\n", inline=False)        
+        
         await client.send_message(message.author, embed=em)
     elif message.content.startswith('!list coins'):
         msg = "we support the following coins:\n"
@@ -68,6 +68,19 @@ async def on_message(message):
 
     elif message.content.startswith('!list exchanges'):
         await client.send_message(message.author, "we support the following exchanges:\n" + ", ".join(getAllExchanges()))
+    elif message.content.startswith('!!!!'):
+        args = message.content.replace("!!!!", "").strip().split(" ")
+        fromCoin = getFromCoin(args[0])
+        toCoin = getToCoin(args[0])
+        for x in toCoin:
+            if fromCoin == x:
+                continue
+            await client.send_message(message.channel, "\n\nwait for technical analyses for "+fromCoin+"/"+x+" taken from tradingview.com")
+            try:
+                gettechnicals(fromCoin,x)
+                await client.send_file(message.channel, 'tech.jpg')
+            except:
+                await client.send_message(message.channel, "sorry i can't find a technical analyses for "+fromCoin+"/"+x+" on tradingview.com")
     elif message.content.startswith('!!!'):
         args = message.content.replace("!!!", "").strip().split(" ")
         fromCoin = getFromCoin(args[0])
@@ -93,7 +106,7 @@ async def on_message(message):
                 msg = "{0:5.8f} @ {1} \n{2}\nRank {3}".format(price_now, ex, fullname, score)
                 em.add_field(name=fromCoin+"/"+x, value=msg, inline=True)
                 msg = "1h={0:8.2f}% {1} \n1d={2:8.2f}% {3} \n7d={4:8.2f}% {5}".format(diff_h, symbol_h, diff_d, symbol_d, diff_7d, symbol_7d)
-                em.add_field(name="Diff", value=msg, inline=True)
+                em.add_field(name="Changes", value=msg, inline=True)
                 em.set_footer(text="use !help for more infos")
             except Exception as inst:
                 await client.send_message(message.author, "invalid or unknown coin pair "+fromCoin+"/"+x)
@@ -120,7 +133,7 @@ async def on_message(message):
                 msg = "{0:5.8f} @ {1} \n".format(price_now, ex)
                 em.add_field(name=fromCoin+"/"+x, value=msg, inline=True)
                 msg = "1h={0:8.2f}% {1} 1d={2:8.2f}% {3} 7d={4:8.2f}% {5}\n".format(diff_h, symbol_h, diff_d, symbol_d, diff_7d, symbol_7d)
-                em.add_field(name="Diff", value=msg, inline=True)
+                em.add_field(name="Changes", value=msg, inline=True)
             except Exception as inst:
                 await client.send_message(message.author, "invalid or unknown coin pair "+fromCoin+"/"+x)
                 print("invalid coin pair "+fromCoin+"/"+x)
@@ -158,5 +171,6 @@ async def on_ready():
     print(client.user.name)
     print(client.user.id)
     print('------')
+    await client.change_presence(game=discord.Game(name='!help for Help'))
 
 client.run(DISCORD_KEY)

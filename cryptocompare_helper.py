@@ -2,6 +2,7 @@ from crycompare import *
 import json
 import time
 import sys
+import datetime
 
 p = Price()
 h = History()
@@ -31,17 +32,21 @@ def getCoin(from_coin, to_coin='USD', exchange='CCCAGG', usefallback=True ):
         timestamp_now = int(time.time())
         timestamp_hour = timestamp_now - 3600 # 1houre
         timestamp_day = timestamp_now - (60*60*24) # 1day
-        timestamp_7days = timestamp_now - (60*60*24*7) # 7days
+        timestamp_7days = timestamp_now - (60*60*24*7) +500 # 7days (we need to cheat a littel because crycompare hold the date only for 7 days)
         try:
                 price_now=p.price(from_coin, to_coin, e=exchange)[to_coin]
-                #price_now=p.priceHistorical(from_coin, to_coin, exchange)[from_coin][to_coin]			
-                price_hour=p.priceHistorical(from_coin, to_coin, exchange, ts=timestamp_hour)[from_coin][to_coin]
-                price_day=p.priceHistorical(from_coin, to_coin, exchange, ts=timestamp_day)[from_coin][to_coin]
-                price_7days=p.priceHistorical(from_coin, to_coin, exchange, ts=timestamp_7days)[from_coin][to_coin]
+                #print( "{0} now {1}/{2} {3:5.8f} @{4}".format(datetime.datetime.fromtimestamp( int(timestamp_now) ).strftime('%Y-%m-%d %H:%M:%S'), from_coin, to_coin, price_now, exchange))
+                price_hour=h.histoMinute(from_coin,to_coin, e=exchange, limit=1, toTs=timestamp_hour)['Data'][0]['close']
+                #print( "{0} 1h  {1}/{2} {3:5.8f} @{4}".format(datetime.datetime.fromtimestamp( int(timestamp_hour) ).strftime('%Y-%m-%d %H:%M:%S'), from_coin, to_coin, price_hour, exchange))
+                price_day=h.histoMinute(from_coin,to_coin, e=exchange, limit=1, toTs=timestamp_day)['Data'][0]['close']
+                #print( "{0} 1d  {1}/{2} {3:5.8f} @{4}".format(datetime.datetime.fromtimestamp( int(timestamp_day) ).strftime('%Y-%m-%d %H:%M:%S'), from_coin, to_coin, price_day, exchange))
+                price_7days=h.histoMinute(from_coin,to_coin, e=exchange, limit=1, toTs=timestamp_7days)['Data'][0]['close']
+                #print( "{0} 7d  {1}/{2} {3:5.8f} @{4}".format(datetime.datetime.fromtimestamp( int(timestamp_7days) ).strftime('%Y-%m-%d %H:%M:%S'), from_coin, to_coin, price_7days, exchange))
                 return (price_now, diff(price_now, price_hour), diff(price_now, price_day), diff(price_now,price_7days), exchange)
 
         except Exception as inst:
                 if usefallback:
+                        print(from_coin + "/" + to_coin +" not found at " + exchange + ", use fallback")
                         return getCoin(from_coin, to_coin, usefallback=False) 
                 else:
                         raise ValueError('Invalid coin pair ' + from_coin + "/" + to_coin)
