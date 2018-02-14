@@ -80,7 +80,7 @@ async def on_message(message):
                 gettechnicals(fromCoin,x)
                 await client.send_file(message.channel, 'tech.jpg')
             except:
-                await client.send_message(message.channel, "sorry i can't find a technical analyses for "+fromCoin+"/"+x+" on tradingview.com")
+                await client.send_message(message.author, "sorry i can't find a technical analyses for "+fromCoin+"/"+x+" on tradingview.com")
     elif message.content.startswith('!!!'):
         args = message.content.replace("!!!", "").strip().split(" ")
         fromCoin = getFromCoin(args[0])
@@ -96,22 +96,23 @@ async def on_message(message):
             if fromCoin == x:
                 continue
             try:
+                price_now, diff_h, diff_d, diff_7d, ex =  getCoin(fromCoin, x, exchange=exchange)
+            except:
                 try:
-                    price_now, diff_h, diff_d, diff_7d, ex =  getCoin(fromCoin, x, exchange=exchange)
-                except:
                     price_now, diff_h, diff_d, diff_7d, ex =  getCoinCC(fromCoin, x)
-                symbol_h = SYMBOL_DOWN if diff_h < 0 else SYMBOL_UP
-                symbol_d = SYMBOL_DOWN if diff_d < 0 else SYMBOL_UP
-                symbol_7d = SYMBOL_DOWN if diff_7d < 0 else SYMBOL_UP
-                msg = "{0:5.8f} @ {1} \n{2}\nRank {3}".format(price_now, ex, fullname, score)
-                em.add_field(name=fromCoin+"/"+x, value=msg, inline=True)
-                msg = "1h={0:8.2f}% {1} \n1d={2:8.2f}% {3} \n7d={4:8.2f}% {5}".format(diff_h, symbol_h, diff_d, symbol_d, diff_7d, symbol_7d)
-                em.add_field(name="Changes", value=msg, inline=True)
-                em.set_footer(text="use !help for more infos")
-            except Exception as inst:
-                await client.send_message(message.author, "invalid or unknown coin pair "+fromCoin+"/"+x)
-                print("invalid coin pair "+fromCoin+"/"+x)
-        await client.send_message(message.channel, embed=em)
+                except:
+                    await client.send_message(message.author, "invalid or unknown coin pair "+fromCoin+"/"+x)
+                    continue
+            symbol_h = SYMBOL_DOWN if diff_h < 0 else SYMBOL_UP
+            symbol_d = SYMBOL_DOWN if diff_d < 0 else SYMBOL_UP
+            symbol_7d = SYMBOL_DOWN if diff_7d < 0 else SYMBOL_UP
+            msg = "{0:5.8f} @ {1} \n{2}\nRank {3}".format(price_now, ex, fullname, score)
+            em.add_field(name=fromCoin+"/"+x, value=msg, inline=True)
+            msg = "1h={0:8.2f}% {1} \n1d={2:8.2f}% {3} \n7d={4:8.2f}% {5}".format(diff_h, symbol_h, diff_d, symbol_d, diff_7d, symbol_7d)
+            em.add_field(name="Changes", value=msg, inline=True)
+            em.set_footer(text="use !help for more infos")
+        if len(em.fields):
+            await client.send_message(message.channel, embed=em)
     elif message.content.startswith('!!'):
         args = message.content.replace("!!", "").strip().split(" ")
         fromCoin = getFromCoin(args[0])
@@ -123,22 +124,24 @@ async def on_message(message):
             if fromCoin == x:
                 continue
             try:
+                price_now, diff_h, diff_d, diff_7d, ex =  getCoin(fromCoin, x, exchange=exchange)
+            except:
                 try:
-                    price_now, diff_h, diff_d, diff_7d, ex =  getCoin(fromCoin, x, exchange=exchange)
-                except:
                     price_now, diff_h, diff_d, diff_7d, ex =  getCoinCC(fromCoin, x)
-                symbol_h = SYMBOL_DOWN if diff_h < 0 else SYMBOL_UP
-                symbol_d = SYMBOL_DOWN if diff_d < 0 else SYMBOL_UP
-                symbol_7d = SYMBOL_DOWN if diff_7d < 0 else SYMBOL_UP
-                msg = "{0:5.8f} @ {1} \n".format(price_now, ex)
-                em.add_field(name=fromCoin+"/"+x, value=msg, inline=True)
-                msg = "1h={0:8.2f}% {1} 1d={2:8.2f}% {3} 7d={4:8.2f}% {5}\n".format(diff_h, symbol_h, diff_d, symbol_d, diff_7d, symbol_7d)
-                em.add_field(name="Changes", value=msg, inline=True)
-            except Exception as inst:
-                await client.send_message(message.author, "invalid or unknown coin pair "+fromCoin+"/"+x)
-                print("invalid coin pair "+fromCoin+"/"+x)
+                except:
+                    await client.send_message(message.author, "invalid or unknown coin pair "+fromCoin+"/"+x)
+                    continue
+                    
+            symbol_h = SYMBOL_DOWN if diff_h < 0 else SYMBOL_UP
+            symbol_d = SYMBOL_DOWN if diff_d < 0 else SYMBOL_UP
+            symbol_7d = SYMBOL_DOWN if diff_7d < 0 else SYMBOL_UP
+            msg = "{0:5.8f} @ {1} \n".format(price_now, ex)
+            em.add_field(name=fromCoin+"/"+x, value=msg, inline=True)
+            msg = "1h={0:8.2f}% {1} 1d={2:8.2f}% {3} 7d={4:8.2f}% {5}\n".format(diff_h, symbol_h, diff_d, symbol_d, diff_7d, symbol_7d)
+            em.add_field(name="Changes", value=msg, inline=True)
         em.set_footer(text="use !help for more infos")
-        await client.send_message(message.channel, embed=em)
+        if len(em.fields):
+            await client.send_message(message.channel, embed=em)
     elif message.content.startswith('!'):
         args = message.content.replace("!", "").strip().split(" ")
         fromCoin = getFromCoin(args[0])
@@ -152,19 +155,17 @@ async def on_message(message):
                 continue
             try:
                 price_now, diff_h, diff_d, diff_7d, ex =  getCoin(fromCoin, x, exchange=exchange)
-                msg += "{0}/{1} {2:5.8f} 1h={3:8.2f}% 1d={4:8.2f}% 7d={5:8.2f}% @{6}\n".format(fromCoin, x, price_now, diff_h, diff_d, diff_7d, ex)
             except:
                 try:
                     price_now, diff_h, diff_d, diff_7d, ex =  getCoinCC(fromCoin, x)
-                    msg += "{0}/{1} {2:5.8f} 1h={3:8.2f}% 1d={4:8.2f}% 7d={5:8.2f}% @{6}\n".format(fromCoin, x, price_now, diff_h, diff_d, diff_7d, ex)
                 except:
                     await client.send_message(message.author, "invalid or unknown coin pair "+fromCoin+"/"+x)
-                    pass
-        
-        em.add_field(name="Price", value=msg, inline=True)
-        em.set_footer(text="use !help for more infos")
-        await client.send_message(message.channel, embed=em)
-
+                    continue
+            msg += "{0}/{1} {2:5.8f} 1h={3:8.2f}% 1d={4:8.2f}% 7d={5:8.2f}% @{6}\n".format(fromCoin, x, price_now, diff_h, diff_d, diff_7d, ex)
+        if len(msg):
+            em.add_field(name="Price", value=msg, inline=True)
+            em.set_footer(text="use !help for more infos")
+            await client.send_message(message.channel, embed=em)
 @client.event
 async def on_ready():
     print('Logged in as')
