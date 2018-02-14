@@ -31,8 +31,14 @@ def getCoinCC(from_coin, to_coin='USD', exchange='coinmarketcup'):
     try:
         price_now=info["price_"+to_coin]
         price_hour=info['percent_change_1h']
+        if price_hour is None:
+            price_hour=0
         price_day=info['percent_change_24h']
+        if price_day is None:
+            price_day=0
         price_7days=info['percent_change_7d']
+        if price_7days is None:
+            price_7days=0
         return (price_now, price_hour, price_day, price_7days, exchange)
     except Exception as inst:
         raise ValueError('Invalid coin pair ' + from_coin + "/" + to_coin)
