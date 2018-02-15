@@ -3,6 +3,7 @@ from discord.ext import commands
 from cryptocompare_helper import *
 from coinmarketcap_helper import *
 from tradingview_helper import *
+from athcoinindex_helper import *
 from secret import DISCORD_KEY
 
 '''
@@ -20,7 +21,7 @@ def getToCoin(args):
         return args.upper().split("/")[1:]
     else:
         return ['BTC', 'USD', 'ETH']
-    
+
 def getFromCoin(args):
     if len(args.split("/")) == 2:
         fromCoin = args.upper().split("/")[0]
@@ -107,7 +108,14 @@ async def on_message(message):
             symbol_h = SYMBOL_DOWN if diff_h < 0 else SYMBOL_UP
             symbol_d = SYMBOL_DOWN if diff_d < 0 else SYMBOL_UP
             symbol_7d = SYMBOL_DOWN if diff_7d < 0 else SYMBOL_UP
-            msg = "{0:5.8f} @ {1} \n{2}\nRank {3}".format(price_now, ex, fullname, score)
+            if x == "USD":
+                try:
+                	ath, athchange = getAth(fullname)
+                	msg = "{0:5.8f} @ {1} \n{2}\nRank {3}\nATH {4}({5})".format(price_now, ex, fullname, score, ath, athchange)
+                except:
+	                msg = "{0:5.8f} @ {1} \n{2}\nRank {3}\n".format(price_now, ex, fullname, score)
+            else:
+                msg = "{0:5.8f} @ {1} \n{2}\nRank {3}\n".format(price_now, ex, fullname, score)
             em.add_field(name=fromCoin+"/"+x, value=msg, inline=True)
             msg = "1h={0:8.2f}% {1} \n1d={2:8.2f}% {3} \n7d={4:8.2f}% {5}".format(diff_h, symbol_h, diff_d, symbol_d, diff_7d, symbol_7d)
             em.add_field(name="Changes", value=msg, inline=True)
