@@ -75,7 +75,8 @@ async def on_message(message):
         for x in toCoin:
             if fromCoin == x:
                 continue
-            await client.send_message(message.channel, "\n\nwait for technical analyses for "+fromCoin+"/"+x+" taken from tradingview.com")
+            url = gettechnicalsUrl(fromCoin,x)
+            await client.send_message(message.channel, "\n\nwait for technical analyses for "+fromCoin+"/"+x+" taken from <"+url+">")
             try:
                 gettechnicals(fromCoin,x)
                 await client.send_file(message.channel, 'tech.jpg')
