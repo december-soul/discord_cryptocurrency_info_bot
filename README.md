@@ -1,6 +1,11 @@
 # discord_cryptocurrency_info_bot
 
 
+[Add this bot to your Discord Server](https://discordapp.com/api/oauth2/authorize?client_id=410704413200744448&permissions=0&scope=bot)
+
+
+
+# Set up the bot yourself 
 copy secret.py and insert your discord key
 ```
 cp secret_example.py secret.py
